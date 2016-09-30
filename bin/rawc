@@ -1,0 +1,3 @@
+rakefilepath = File.join( File.dirname(__FILE__), '../lib/rawc/Rakefile.rb' )
+result = system("rake --rakefile " + rakefilepath + " " + ARGV.join(' '))
+exit 1 unless result
