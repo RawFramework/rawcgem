@@ -7,7 +7,7 @@ require 'uri'
 require 'rubygems'
 require 'zip'
 require 'colorize'
-#load 'jasmine/tasks/jasmine.rake'
+
 
 
 
@@ -19,12 +19,6 @@ task :rake_dot_net_initialize do
   end
   
   yml = YAML::load File.open("dev.yml")
-  #@website_port = yml["website_port"]
-  #@website_deploy_directory = yml["website_deploy_directory"]
-  #@website_port_load_balanced_1 = yml["website_port_load_balanced_1"]
-  #@website_deploy_directory_load_balanced_1 = yml["website_deploy_directory_load_balanced_1"]
-  #@website_port_load_balanced_2 = yml["website_port_load_balanced_2"]
-  #@website_deploy_directory_load_balanced_2 = yml["website_deploy_directory_load_balanced_2"]
   @solution_name = "#{ yml["solution_name"] }.sln"
   @solution_name_sans_extension = "#{ yml["solution_name"] }"
   @mvc_project_directory = yml["mvc_project"]
@@ -43,7 +37,7 @@ end
 desc "builds and run the website"
 task :default => [:build]
 
-desc "creates a new app, downloads the template from github and initialize the app"
+desc "creates a new app, unzips the template and initialize the app"
 task :newApp  do
   #ask for appName
   puts "Enter app name(case sensitive):".colorize(:cyan)
@@ -52,15 +46,7 @@ task :newApp  do
   filename =  File.join( File.dirname(__FILE__), 'rawcore.zip' )
   #create the folder
   Dir.mkdir appname
-  #puts "Downloading template......".colorize(:light_green)
-  #for now the template is hosted on the github public pages
-  #Net::HTTP.start("rawframework.github.io") do |http|
-  #  resp = http.get("/RawTemplate/rawcore.zip")
-  #  open(filename, "wb") do |file|
-  #      file.write(resp.body)
-  #  end
-  #end
-
+  
   puts "Inflating template and replacing tokens......".colorize(:light_green)
   Zip::File.open(filename) do |zip_file|
   
@@ -69,11 +55,15 @@ task :newApp  do
   zip_file.each do |entry|
       unzipped =entry.name.gsub(toRepalce,appname)
       entry.extract("#{appname}/#{unzipped}")
-      #skip dlls, images, fonts, etc
+      #skip dlls, images, fonts, javascript and css
       if !((unzipped.include? ".dll") || 
            (unzipped.include? ".png") || 
            (unzipped.include? ".jpg") || 
-           (unzipped.include? ".gif") || 
+           (unzipped.include? ".gif") ||
+           (unzipped.end_with? ".css") || 
+           (unzipped.end_with? ".js") || 
+           (unzipped.end_with? ".map") ||
+           (unzipped.include? ".less") || 
            (unzipped.include? ".otf") || 
            (unzipped.include? ".eot") || 
            (unzipped.include? ".svg") || 
@@ -132,13 +122,3 @@ task :help do
   sh "start https://rawframework.github.io/rawfdotnetcore/index.html"
 end
 
-
-
-desc "run fuzz test using gremlins.js, optionally you can pass the next parameters: controller, view and id. rake gremlins[user,edit,5]"
-task :gremlins, :controller, :view, :id do |t, args|
-  controller = args[:controller] || "home"
-  view = args[:view] ? "\\#{args[:view]}" : ""
-  id = args[:id] ? "\\#{args[:id]}" : ""
-
-  sh "start http:\\localhost:3000\\#{controller + view + id}?gremlins=true"
-end

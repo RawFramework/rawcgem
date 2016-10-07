@@ -6,20 +6,15 @@ begin
 	#Dir[File.dirname(Dir.pwd) + '/templates/*.rb'].each {|file| require file }
 	Dir[ './templates/*.rb'].each {|file| require file }
 rescue LoadError
-	puts "============ note ============="
-	puts "Looks like you don't have nokogiri installed. Nokogiri is used to help you quickly scaffold models, view and controllers:" 
-	puts "You *DO NOT* need scaffolding for the Oak interactive tutorial, or any development (just a nice to have)"
-	puts "So don't worry about this note if you don't want scaffolding"
-	puts "Instructions for setting up nokogiri (one time):"
-	puts "  - Install chocolatey by running the powershell script located at chocolatey.org" 
-	puts "  - After chocolatey is installed, run the command: cinst ruby.devkit (if you haven't installed ruby's DevKit)" 
-	puts "  - Then run the command 'gem install nokogiri'"
-	puts "  - Type 'rake -D gen' for more information on scaffolding (the source located in scaffold.rb)."
-	puts "================================"
+	puts "============ note =============".colorize(:light_yellow)
+	puts "Looks like you don't have some gems installed, type ".colorize(:yellow) 
+	puts "rawc help".colorize(:cyan)
+	puts "for pre requisites and get help.".colorize(:yellow)
+	puts "================================".colorize(:light_yellow)
 	puts ""
 end
 
-namespace :gen do
+namespace :new do
 	desc "creates models for each table in the data base, example: rake gen:fullDbModels"
 	task :full_db_models, [] => :rake_dot_net_initialize do |t, args|
 		system("cd XmlGenerator&dotnet Generator.dll Model fulldb ../#{@mvc_project_directory}")
@@ -208,7 +203,7 @@ namespace :gen do
 		#Delete the xml
 		File.delete(file_name)	
 		
-		puts "Process completed!!"
+		puts "Process completed!!".colorize(:light_green)
 		
 	end
 
@@ -251,35 +246,18 @@ namespace :gen do
 
 	def add_compile_node folder, name, project = nil
 		#this is no logner needed for dotnet core projects
-		#to_open = project || proj_file
-		#doc = Nokogiri::XML(open(to_open))
-		#if folder == :root
-		#	add_include doc, :Compile, "#{name}.cs"
-		#else
-		#	add_include doc, :Compile, "#{folder.to_s}\\#{name}.cs"
-		#end
-		#File.open(to_open, "w") { |f| f.write(doc) }
 	end
 
 	def add_cshtml_node folder, name
 		#this is no logner needed for dotnet core projects
-		#doc = Nokogiri::XML(open(proj_file))
-		#add_include doc, :Content, "Views\\#{folder}\\#{name}.cshtml"
-		#File.open(proj_file, "w") { |f| f.write(doc) }
 	end
 	
 	def add_js_node name
 		#this is no logner needed for dotnet core projects
-		#doc = Nokogiri::XML(open(proj_file))
-		#add_include doc, :Content, "Scripts\\app\\#{name}.js"
-		#File.open(proj_file, "w") { |f| f.write(doc) }
 	end
 
 	def add_include doc, type, value
 		#this is no logner needed for dotnet core projects
-		#if doc.xpath("//xmlns:#{type.to_s}[@Include='#{value}']").length == 0
-		#	doc.xpath("//xmlns:ItemGroup[xmlns:#{type.to_s}]").first << "<#{type.to_s} Include=\"#{value}\" />"
-		#end
 	end
 
 	def proj_file
@@ -373,11 +351,7 @@ namespace :gen do
 	end
 
 	def create_tests_controller_template model
-		#test project is not implemented yet
-		#name = model['name']
-		#file_name = "#{name}Controller_spec"
-		#save tests_controller_template(model), "#{@test_project}/#{file_name}.cs"
-		#add_compile_node :root, file_name, proj_tests_file
+		#TODO:test project is not implemented yet
 	end
 
 	def create_js_bs_grid_template model
@@ -402,16 +376,6 @@ namespace :gen do
 
 		file.close		
 	end
-
-	#remove the following comments if you are not going to use sidekick
-	#Rake::Task["model"].enhance do
-	#  Rake::Task["rebuild"].invoke
-	#end
-	#Rake::Task["crudFor"].enhance do
-	#  Rake::Task["rebuild"].invoke
-	#end
-	#Rake::Task["api"].enhance do
-	#  Rake::Task["rebuild"].invoke
-	#end
+	
 end
 
