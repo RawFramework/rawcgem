@@ -2,7 +2,7 @@ require_relative './command_shell.rb'
 require 'net/http'
 require 'yaml'
 require_relative './scaffold.rb'
-require 'jasmine'
+#require 'jasmine'
 require 'uri'
 require 'rubygems'
 require 'zip'
@@ -55,7 +55,7 @@ task :newApp  do
   zip_file.each do |entry|
       unzipped =entry.name.gsub(toRepalce,appname)
       entry.extract("#{appname}/#{unzipped}")
-      #skip dlls, images, fonts, javascript and css
+      #skip dlls, images, fonts, javascript, css, etc
       if !((unzipped.include? ".dll") || 
            (unzipped.include? ".png") || 
            (unzipped.include? ".jpg") || 
@@ -90,7 +90,16 @@ task :newApp  do
   sh "dotnet build #{appname}/Generator/project.json -o #{appname}/XmlGenerator -f netcoreapp1.0"
   sh "dotnet build #{appname}/#{appname}.Web/project.json"
   puts "Done!".colorize(:light_blue)
-  puts "Type rawc help to open a tutorial".colorize(:ligh_yellow)
+  puts "======================================================================================".colorize(:cyan)
+  puts "RAW framework follows Database First approach, expects that a DB schema already exists".colorize(:light_yellow)
+  puts "The application is configured to connect to a local SQL server express".colorize(:light_yellow)
+  puts "Change the following connection(if necessary) before you start scaffolding".colorize(:light_yellow)
+  puts "Data Source=localhost\\SQLEXPRESS;Initial Catalog=#{appname};Trusted_Connection=True;".colorize(:light_green)
+  puts "The connection string is in two appsettings.json files under the following folders:".colorize(:light_yellow)
+  puts "- #{appname}.Web".colorize(:light_green)
+  puts "- Generator".colorize(:light_green)
+  puts "======================================================================================".colorize(:cyan)
+  puts "Type rawc help for documentation".colorize(:light_yellow)
   puts "Type cd #{appname} to start scaffolding!".colorize(:light_green)
 end
 

@@ -19,10 +19,12 @@ namespace :new do
 	task :full_db_models, [] => :rake_dot_net_initialize do |t, args|
 		system("cd XmlGenerator&dotnet Generator.dll Model fulldb ../#{@mvc_project_directory}")
 		FileUtils.mv Dir.glob('XmlGenerator/*.xml'), "."
+		#delete the sysdiagrams file
+		FileUtils.rm 'sysdiagrams.xml', :force=>true
 		Dir.glob('*.xml') do |xml_file|
 		  file_name = File.basename(xml_file, File.extname(xml_file))
-			Rake::Task['gen:model'].invoke(file_name)
-			Rake::Task['gen:model'].reenable
+			Rake::Task['new:model'].invoke(file_name)
+			Rake::Task['new:model'].reenable
 		end
 
 	end
@@ -100,6 +102,10 @@ namespace :new do
 		root_namespace = (root_namespace.nil? || root_namespace == entityNameSpace) ? '' : "using #{root_namespace};" 
 
 		create_controller_template main_model, primaryKeyType, entityNameSpace,root_namespace
+		#close the xml
+		xml_file.close
+		#Delete the xml
+		File.delete(file_name)	
 	end	
 
 	desc "Adds a new repository, example: rake gen:repository[User]"
@@ -121,6 +127,10 @@ namespace :new do
 		root_namespace = (root_namespace.nil? || root_namespace == entityNameSpace) ? '' : "using #{root_namespace};" 
 
 		create_repository_template name, primaryKeyType, entityNameSpace
+		#close the xml
+		xml_file.close
+		#Delete the xml
+		File.delete(file_name)
 	end	
 
 	desc "Adds a new view, you can choose to use bs_grid plug in for index view with a optional third parameter <true>, 
@@ -166,6 +176,10 @@ namespace :new do
 		else
 			puts "View type is not valid."	
 		end
+		#close the xml
+		xml_file.close
+		#Delete the xml
+		File.delete(file_name)
 	end	
 
 
@@ -182,16 +196,18 @@ namespace :new do
 		xml_file = File.open(file_name)
  		nkg_xml_model = Nokogiri::XML(xml_file)
 		
- 		@is_view_model = nkg_xml_model.xpath("//entity").length > 1
- 		
+ 		@is_view_model = nkg_xml_model.xpath("//entity").first['isViewModel']
+		
  		main_model = nkg_xml_model.xpath("//entity").first
 		name = main_model['name']
  		primaryKeyType = main_model['primaryKeyType']
  		root_namespace = nkg_xml_model.xpath("//model").first['namespace']
  		entityNameSpace = main_model['namespace']
 		root_namespace = (root_namespace.nil? || root_namespace == entityNameSpace) || root_namespace =='' || root_namespace.nil?  ? '' : "using #{root_namespace};" 
-
-		create_repository_template name, primaryKeyType, entityNameSpace
+		#do not create the repository if it's a viewmodel
+		if @is_view_model == 'True' || @is_view_model == 'true'
+			create_repository_template name, primaryKeyType, entityNameSpace	
+		end
 		
 		create_controller_template main_model, primaryKeyType, entityNameSpace, root_namespace
 
