@@ -121,7 +121,7 @@ end
 
 desc "run the application"
 task :run => :rake_dot_net_initialize do
-  sh "cd #{@project_name}.Web&dotnet run" 
+  sh "cd #{@project_name}.Web && dotnet run" 
 end
 
 

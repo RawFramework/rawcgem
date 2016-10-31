@@ -17,7 +17,7 @@ end
 namespace :new do
 	desc "creates models for each table in the data base, example: rake gen:fullDbModels"
 	task :full_db_models, [] => :rake_dot_net_initialize do |t, args|
-		system("cd XmlGenerator&dotnet Generator.dll Model fulldb ../#{@mvc_project_directory}")
+		system("cd XmlGenerator && dotnet Generator.dll Model fulldb ../#{@mvc_project_directory}")
 		FileUtils.mv Dir.glob('XmlGenerator/*.xml'), "."
 		#delete the sysdiagrams file
 		FileUtils.rm 'sysdiagrams.xml', :force=>true
@@ -35,7 +35,7 @@ namespace :new do
 		model_name = args[:model]
 		file_name = model_name.ext("xml")
 
-		system("cd XmlGenerator&dotnet Generator.dll Views #{model_name} ../#{@mvc_project_directory}")
+		system("cd XmlGenerator && dotnet Generator.dll Views #{model_name} ../#{@mvc_project_directory}")
 		FileUtils.mv Dir.glob('XmlGenerator/*.xml'), "."
 	end
 
@@ -47,7 +47,7 @@ namespace :new do
 
 		verify_file_name file_name
 
-		system("cd XmlGenerator&dotnet Generator.dll Model #{model_name} ../#{@mvc_project_directory}")
+		system("cd XmlGenerator && dotnet Generator.dll Model #{model_name} ../#{@mvc_project_directory}")
 		FileUtils.mv Dir.glob('XmlGenerator/*.xml'), "."
  		xml_file = File.open(file_name)
  		nkg_xml_model = Nokogiri::XML(xml_file)
@@ -196,8 +196,13 @@ namespace :new do
 		xml_file = File.open(file_name)
  		nkg_xml_model = Nokogiri::XML(xml_file)
 		
- 		@is_view_model = nkg_xml_model.xpath("//entity").first['isViewModel']
-		
+ 		isVM = nkg_xml_model.xpath("//entity").first['isViewModel']
+    	if isVM == 'True' || isVM == 'true'
+			@is_view_model = true
+		else 
+			@is_view_model = false
+		end
+
  		main_model = nkg_xml_model.xpath("//entity").first
 		name = main_model['name']
  		primaryKeyType = main_model['primaryKeyType']
@@ -205,7 +210,7 @@ namespace :new do
  		entityNameSpace = main_model['namespace']
 		root_namespace = (root_namespace.nil? || root_namespace == entityNameSpace) || root_namespace =='' || root_namespace.nil?  ? '' : "using #{root_namespace};" 
 		#do not create the repository if it's a viewmodel
-		if @is_view_model == 'True' || @is_view_model == 'true'
+		if not @is_view_model 
 			create_repository_template name, primaryKeyType, entityNameSpace	
 		end
 		
