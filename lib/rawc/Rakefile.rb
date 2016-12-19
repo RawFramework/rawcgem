@@ -124,7 +124,15 @@ task :run => :rake_dot_net_initialize do
   sh "cd #{@project_name}.Web && dotnet run" 
 end
 
+desc "create a docker container"
+task :createContainer => :rake_dot_net_initialize do
+  sh "docker build -t rawframework:#{@project_name} ."
+end
 
+desc "run the a docker container with the app"
+task :runContainer => :rake_dot_net_initialize do
+  sh "docker run -d -p 8080:5000 rawframework:#{@project_name}"
+end
 
 desc "Show help"
 task :help do

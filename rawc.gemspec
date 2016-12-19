@@ -1,4 +1,4 @@
-version = '1.0'
+version = '1.5'
 Gem::Specification.new do |s|
   s.platform    = Gem::Platform::RUBY
   s.name        = 'rawc'
